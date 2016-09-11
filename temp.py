@@ -184,7 +184,90 @@ def plotBoundries(subplot,me,cov,subplot1):
 		y+=increamentory
 		yi+=1
 	CS = subplot1.contour(vecx,vecy,vecz)
-	subplot1.clabel(CS, inline=0, fontsize=0)	
+	subplot1.clabel(CS, inline=1, fontsize=10)	
+
+def confusionM(data,me,co):
+	clsno=len(data)
+	returnM=[]
+	p=[]
+	for clsi in range(clsno):
+		p.append(0)
+
+	for clsi in range(clsno):
+		dtno=len(data[clsi])
+		for cli in range(clsno):
+			p[cli]=0
+		for datai in range (int(math.floor(0.75*dtno)),dtno):
+			k=classify(data[clsi][datai],me,co)
+			p[k]+=1
+		#bakchodi
+		returnM.append(p[:])
+	return returnM	
+
+def accuracy(confmatrix,ntest):
+	dmatrix=len(confmatrix)
+	accu=0.0
+	for i in range (dmatrix):
+		accu=accu+confmatrix[i][i]
+	accu=accu/ntest
+	return accu
+
+def per_accuracy(confmatrix,ntest):
+	p_accu=accuracy(confmatrix,ntest)
+	return p_accu*100
+
+def precision(confmatrix):
+	pre=[]
+	dmatrix=len(confmatrix)
+	for i in range (dmatrix):
+		tp=0.0		
+		for j in range (dmatrix):
+			tp=tp+confmatrix[j][i]
+		tc=confmatrix[i][i]
+		pre.append(tc/tp)
+	return pre
+
+def mean_precision(confmatrix):
+	pre=precision(confmatrix)
+	temp=0.0	
+	for i in range(len(pre)):
+		temp=temp+pre[i]
+	return (temp/(len(pre)))
+
+def recall(confmatrix):
+	rec=[]
+	dmatrix=len(confmatrix)
+	for i in range(dmatrix):
+		n=0.0
+		for j in range(dmatrix):
+			n=n+confmatrix[i][j]
+		tc=confmatrix[i][i]
+		rec.append(tc/n)
+	return rec
+
+def mean_recall(confmatrix):
+	rec=recall(confmatrix)
+	temp=0.0
+	for i in range (len(rec)):
+		temp=temp+rec[i]
+	return (temp/(len(rec)))
+
+def f_measure(confmatrix):
+	f=[]
+	pre=precision(confmatrix)
+	rec=recall(confmatrix)
+	temp=0.0
+	for i in range (len(confmatrix)):
+		temp=pre[i]*rec[i]*2/(pre[i]+rec[i])
+		f.append(temp)
+	return f
+
+def mean_f_measure(confmatrix):
+	f=f_measure(confmatrix)
+	temp=0.0
+	for i in range (len(f)):
+		temp=temp+f[i]
+	return (temp/(len(f)))
 
 #universal matrices
 data=[]
@@ -306,6 +389,9 @@ for i in range(clsno):
 	hitRate.append(0)
 #endoffor
 
+totaltestdatano=0
+for clsi in range(clsno):
+	totaltestdatano+=int(math.ceil(0.25*len(data[clsi])))
 
 #part 1 (a) (i)
 covariance1ai=[]
@@ -325,8 +411,24 @@ for clsi in range(1,clsno):
 plotBoundries(ax1,mean,covariance1ai,ax6)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance1ai,ax1)
-print "1 (a) (i) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "1 (a) (i)"
+confM=confusionM(data,mean,covariance1ai)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #part i (a) (ii)
 mean1aii=[]
@@ -366,8 +468,24 @@ for i in range(clsno):
 plotBoundries(ax12,mean,covariance1aii,ax7)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance1aii,ax12)
-print "1 (a) (ii) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "1 (a) (ii)"
+confM=confusionM(data,mean,covariance1aii)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #part 1 (b)
 #initialising hitRate
@@ -378,8 +496,24 @@ for i in range(clsno):
 plotBoundries(ax2,mean,covariance,ax8)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance,ax2)
-print "1 (b) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "1 (b) "
+confM=confusionM(data,mean,covariance)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #part 2 (a)
 covariance2a=[]
@@ -412,8 +546,24 @@ for i in range(clsno):
 plotBoundries(ax3,mean,covariance2a,ax9)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2a,ax3)
-print "2 (a) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "2 (a) "
+confM=confusionM(data,mean,covariance2a)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #part 2 (b)
 covariance2b=[]
@@ -436,8 +586,24 @@ for i in range(clsno):
 plotBoundries(ax4,mean,covariance2b,ax10)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2b,ax4)
-print "2 (b) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "2 (b) "
+confM=confusionM(data,mean,covariance2b)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #part 2 (c)
 covariance2c=covariance
@@ -453,11 +619,26 @@ for i in range(clsno):
 plotBoundries(ax5,mean,covariance2c,ax11)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2c,ax5)
-print "2 (c) hit rate "
-print hitRate
+print "-------------------------------------------------------------------"
+print "2 (c) "
+confM=confusionM(data,mean,covariance2c)
+acc=accuracy(confM,totaltestdatano)
+prec=precision(confM)
+meprec=mean_precision(confM)
+rec=recall(confM)
+merec=mean_recall(confM)
+fmes=f_measure(confM)
+mefmes=mean_f_measure(confM)
+print "confusion matrix : ",str(confM)
+print "accuracy : ",str(acc)
+print "precision : ",str(prec)
+print "mean precision : ",str(meprec)
+print "recall : ",str(rec)
+print "mean recall : ",str(merec)
+print "f measure : ",str(fmes)
+print "mean fmeasure",str(mefmes)
 
 #-------------------------------------------------------------------
 plt.axis([minx,maxx,miny,maxy])
 plt.show()
 #-------------------------------------------------------------------
-
