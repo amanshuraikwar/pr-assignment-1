@@ -161,28 +161,59 @@ def runClassifier(data,hitRate,me,cov,subplot):
 		#endoffor
 	#endoffor
 
-def plotBoundries(subplot,me,cov):
-	x=minx
-	print minx,miny,maxx,maxy
-	while (x < maxx):
-		y=miny
-		while (y < maxy):
+def plotBoundries(subplot,me,cov,subplot1):
+	vecx=[]
+	vecy=[]
+	vecz=[]
+	yi=0
+	y=miny
+	#print minx,miny,maxx,maxy
+	while (y < maxy):
+		vecz.append([])
+		x=minx
+		vecy.append(y)
+		while (x < maxx):
+			if(y==miny):
+				vecx.append(x)
 			#print x,y
-			subplot.plot(x,y,color=color[classify([[x],[y]],me,cov)],marker="o")
-			y=y+increamentory
+			clas=classify([[x],[y]],me,cov)
+			vecz[yi].append(g([[x],[y]],cov[clas],me[clas]))
+			subplot.plot(x,y,color=color[clas],marker="o")
+			x+=increamentorx
 		#print "came out"	
-		x=x+increamentorx
+		y+=increamentory
+		yi+=1
+	CS = subplot1.contour(vecx,vecy,vecz)
+	subplot1.clabel(CS, inline=0, fontsize=0)	
 
 #universal matrices
 data=[]
 mean=[]
 covariance=[]
 dtdim=0
+
 fig=plt.figure()
 fig1=plt.figure()
+fig2=plt.figure()
+fig3=plt.figure()
+ax6=fig2.add_subplot(221)
+ax6.set_title(" 1 a i ")
+ax7=fig2.add_subplot(222)
+ax7.set_title(" 1 a ii ")
+ax8=fig2.add_subplot(223)
+ax8.set_title(" 1 b ")
+ax9=fig3.add_subplot(221)
+ax9.set_title(" 2 a ")
+ax10=fig3.add_subplot(222)
+ax10.set_title(" 2 b ")
+ax11=fig3.add_subplot(223)
+ax11.set_title(" 2 c ")
+
 ax1=fig.add_subplot(221)
 ax1.set_title(" 1 a i ")
-ax2=fig.add_subplot(222)
+ax12=fig.add_subplot(222)
+ax12.set_title(" 1 a ii ")
+ax2=fig.add_subplot(223)
 ax2.set_title(" 1 b ")
 ax3=fig1.add_subplot(221)
 ax3.set_title(" 2 a ")
@@ -221,8 +252,7 @@ for filei in range(1,nooffiles):
 				try:
 					data[filei-1][linei].append([float(value[valuei])])	
 				except ValueError:
-					continue	
-			dtdim=len(data[0][0][0])		
+					continue
 			#endoffor
 			#checking for ranges of data
 			if(float(value[0])<minx):
@@ -237,10 +267,12 @@ for filei in range(1,nooffiles):
 	#endofwith
 #endoffor
 
+dtdim=len(data[0][0])
+
 #no of classes
 clsno=len(data)
-increamentorx=(maxx-minx)/25
-increamentory=(maxy-miny)/25
+increamentorx=(maxx-minx)/50
+increamentory=(maxy-miny)/50
 
 #calculating mean
 #for each class
@@ -266,7 +298,7 @@ for clsi in range(clsno):
 	#endoffor
 	covariance[clsi]=divByConstM(covariance[clsi],dtpntno)	
 #endoffor
-print covariance
+#print covariance
 
 hitRate=[]
 #initialising hitRate
@@ -290,10 +322,51 @@ for clsi in range(1,clsno):
 	covariance1ai[clsi]=covariance1ai[0]
 #endoffor
 #-------------------------------------------------------------------
-plotBoundries(ax1,mean,covariance1ai)
+plotBoundries(ax1,mean,covariance1ai,ax6)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance1ai,ax1)
 print "1 (a) (i) hit rate "
+print hitRate
+
+#part i (a) (ii)
+mean1aii=[]
+covariance1aii=[]
+mean1aii.append([])
+mean1aii[0]=divByConstM(mean[0],1/float(len(data[0])))
+lendata=len(data[0])
+#average of each class
+for clsi in range(1,clsno):
+	mean1aii.append([])
+	mean1aii[0]=addM(divByConstM(mean[clsi],1/float(len(data[clsi]))),mean1aii[0])
+	lendata+=len(data[clsi])
+#endoffor
+mean1aii[0]=divByConstM(mean1aii[0],lendata)
+for clsi in range(1,clsno):
+	mean1aii[clsi]=mean1aii[0]
+#endoffor
+covariance1aii.append([])
+covariance1aii[0]=subM(I(dtdim),I(dtdim))
+for clsi in range(clsno):
+	#how much data to be taken as training
+	dtpntno=int(math.floor(0.75*len(data[clsi])))
+	#for each data point
+	for dtpnti in range(dtpntno):
+		covariance1aii[0]=addM(mulM(subM(data[clsi][dtpnti],mean1aii[0]),transpose(subM(data[clsi][dtpnti],mean1aii[0]))),covariance1aii[0])
+	#endoffor
+covariance1aii[0]=divByConstM(covariance1aii[0],lendata)
+for clsi in range(1,clsno):
+	covariance1aii.append([])
+	covariance1aii[clsi]=covariance1aii[0]
+#endoffor
+#initialising hitRate
+for i in range(clsno):
+	hitRate[i]=0
+#endoffor
+#-------------------------------------------------------------------
+plotBoundries(ax12,mean,covariance1aii,ax7)
+#-------------------------------------------------------------------
+runClassifier(data,hitRate,mean,covariance1aii,ax12)
+print "1 (a) (ii) hit rate "
 print hitRate
 
 #part 1 (b)
@@ -302,9 +375,8 @@ for i in range(clsno):
 	hitRate[i]=0
 #endoffor
 #-------------------------------------------------------------------
-plotBoundries(ax2,mean,covariance)
+plotBoundries(ax2,mean,covariance,ax8)
 #-------------------------------------------------------------------
-
 runClassifier(data,hitRate,mean,covariance,ax2)
 print "1 (b) hit rate "
 print hitRate
@@ -337,7 +409,7 @@ for i in range(clsno):
 	hitRate[i]=0
 #endoffor
 #-------------------------------------------------------------------
-plotBoundries(ax3,mean,covariance2a)
+plotBoundries(ax3,mean,covariance2a,ax9)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2a,ax3)
 print "2 (a) hit rate "
@@ -361,7 +433,7 @@ for i in range(clsno):
 	hitRate[i]=0
 #endoffor
 #-------------------------------------------------------------------
-plotBoundries(ax4,mean,covariance2b)
+plotBoundries(ax4,mean,covariance2b,ax10)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2b,ax4)
 print "2 (b) hit rate "
@@ -378,14 +450,14 @@ for i in range(clsno):
 	hitRate[i]=0
 #endoffor
 #-------------------------------------------------------------------
-plotBoundries(ax5,mean,covariance2c)
+plotBoundries(ax5,mean,covariance2c,ax11)
 #-------------------------------------------------------------------
 runClassifier(data,hitRate,mean,covariance2c,ax5)
 print "2 (c) hit rate "
 print hitRate
 
 #-------------------------------------------------------------------
-plt.axis([minx,maxx,miny,maxy])	
+plt.axis([minx,maxx,miny,maxy])
 plt.show()
 #-------------------------------------------------------------------
 
